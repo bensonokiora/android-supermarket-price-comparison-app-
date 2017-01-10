@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_home"
+            android:icon="@drawable/home"
+            android:title="Home" />
+        <item
+            android:id="@+id/nav_admin"
+            android:icon="@drawable/settings"
+            android:title="Admin" />
+        <item
+            android:id="@+id/nav_s_admin"
+            android:icon="@drawable/settings"
+            android:title="Supermarket Admin" />
+        <item
+            android:id="@+id/nav_slideshow"
+            android:icon="@drawable/sharethis"
+            android:title="Share" />
+        <item
+            android:id="@+id/nav_manage"
+            android:icon="@drawable/star"
+            android:title="Rate" />
+    </group>
+
+    <item android:title="Preferences">
+        <menu>
+            <item
+                android:id="@+id/nav_share"
+                android:icon="@drawable/settings"
+                android:title="Settings" />
+
+        </menu>
+    </item>
+
+</menu>
