@@ -61,10 +61,6 @@
             android:label="@string/title_activity_supermarket_admin_products"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".SupermarketUsers"
-            android:label="@string/title_activity_supermarket_users"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
             android:name=".ListUsers"
             android:label="@string/title_activity_list_users"
             android:theme="@style/AppTheme.NoActionBar"></activity>

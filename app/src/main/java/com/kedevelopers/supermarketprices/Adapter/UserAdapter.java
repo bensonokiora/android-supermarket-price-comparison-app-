@@ -47,17 +47,17 @@ import java.util.Map;
 
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
 
+    //List to store all Users
+    ArrayList<User> Users;
     //Imageloader to load image
     private ImageLoader imageLoader;
     private Context context;
     private UserAdapter context2;
     private ProgressDialog mProgressDialog;
+    private ArrayList<User> mUsers;
 
-    //List to store all Users
-    ArrayList<User> Users;
-    private  ArrayList<User> mUsers;
     //Constructor of this class
-    public UserAdapter(ArrayList<User> Users, Context context){
+    public UserAdapter(ArrayList<User> Users, Context context) {
         super();
         //Getting all Users
         this.Users = Users;
@@ -78,7 +78,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     public void onBindViewHolder(UserAdapter.ViewHolder holder, int position) {
 
         //Getting the particular item from the list
-        User user =  Users.get(position);
+        User user = Users.get(position);
 
 
         //Showing data on the views
@@ -93,59 +93,17 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     public int getItemCount() {
         return Users.size();
     }
-    public void setFilter(List<User> Users){
+
+    public void setFilter(List<User> Users) {
         Users = new ArrayList<>();
         Users.addAll(Users);
         notifyDataSetChanged();
     }
 
-
-    class ViewHolder extends RecyclerView.ViewHolder {
-        //Views
-        public TextView textViewSupermarket;
-        public TextView textViewName;
-        public TextView textViewEmail;
-        public TextView textViewid;
-
-        public LinearLayout card_layout;
-
-        //Initializing Views
-        public ViewHolder(View itemView) {
-            super(itemView);
-            textViewSupermarket = (TextView) itemView.findViewById(R.id.textViewSupermarket);
-            textViewName = (TextView) itemView.findViewById(R.id.textViewName);
-            textViewid = (TextView) itemView.findViewById(R.id.textViewId);
-
-            textViewEmail = (TextView) itemView.findViewById(R.id.textViewEmail);
-            card_layout = (LinearLayout) itemView.findViewById(R.id.card_layout);
-
-card_layout.setOnLongClickListener(new View.OnLongClickListener() {
-    @Override
-    public boolean onLongClick(View view) {
-
-        String em= textViewid.getText().toString();
-        DeleteUser(em);
-
-        return false;
-    }
-});
-card_layout.setOnClickListener(new View.OnClickListener() {
-    @Override
-    public void onClick(View view) {
-        
-    }
-});
-            
-        }
-
-
-    }
-
-
     private void DeleteUser(final String id) {
 
         String tag_string_req = "req_save";
-          StringRequest strReq = new StringRequest(Request.Method.POST,
+        StringRequest strReq = new StringRequest(Request.Method.POST,
                 Config.DELETE_USER_URL, new Response.Listener<String>() {
 
             @Override
@@ -157,14 +115,12 @@ card_layout.setOnClickListener(new View.OnClickListener() {
                     boolean error = jObj.getBoolean("error");
                     String message = jObj.getString("message");
 
-                    if(!error){
-                        Toast.makeText(context,message,Toast.LENGTH_SHORT).show();
+                    if (!error) {
+                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
 
-                    }
+                    } else {
 
-                    else{
-
-                        Toast.makeText(context,message,Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
 
 
                     }
@@ -181,23 +137,23 @@ card_layout.setOnClickListener(new View.OnClickListener() {
             public void onErrorResponse(VolleyError error) {
                 Log.e("TAG", "Upload Error: " + error.getMessage());
                 if (error instanceof TimeoutError || error instanceof NoConnectionError) {
-                    Toast.makeText(context,"Check your internet Connection | TimeoutError",
+                    Toast.makeText(context, "Check your internet Connection | TimeoutError",
                             Toast.LENGTH_LONG).show();
                 } else if (error instanceof AuthFailureError) {
                     //TODO
-                    Toast.makeText(context,"AuthFailureError error",
+                    Toast.makeText(context, "AuthFailureError error",
                             Toast.LENGTH_LONG).show();
                 } else if (error instanceof ServerError) {
                     //TODO
-                    Toast.makeText(context,"ServerError error",
+                    Toast.makeText(context, "ServerError error",
                             Toast.LENGTH_LONG).show();
                 } else if (error instanceof NetworkError) {
                     //TODO
-                    Toast.makeText(context,"NetworkError error",
+                    Toast.makeText(context, "NetworkError error",
                             Toast.LENGTH_LONG).show();
                 } else if (error instanceof ParseError) {
                     //TODO
-                    Toast.makeText(context,"ParseError error",
+                    Toast.makeText(context, "ParseError error",
                             Toast.LENGTH_LONG).show();
                 }
 
@@ -221,7 +177,46 @@ card_layout.setOnClickListener(new View.OnClickListener() {
         AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
     }
 
+    class ViewHolder extends RecyclerView.ViewHolder {
+        //Views
+        public TextView textViewSupermarket;
+        public TextView textViewName;
+        public TextView textViewEmail;
+        public TextView textViewid;
 
+        public LinearLayout card_layout;
+
+        //Initializing Views
+        public ViewHolder(View itemView) {
+            super(itemView);
+            textViewSupermarket = (TextView) itemView.findViewById(R.id.textViewSupermarket);
+            textViewName = (TextView) itemView.findViewById(R.id.textViewName);
+            textViewid = (TextView) itemView.findViewById(R.id.textViewId);
+
+            textViewEmail = (TextView) itemView.findViewById(R.id.textViewEmail);
+            card_layout = (LinearLayout) itemView.findViewById(R.id.card_layout);
+
+            card_layout.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+
+                    String em = textViewid.getText().toString();
+                    DeleteUser(em);
+
+                    return false;
+                }
+            });
+            card_layout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                }
+            });
+
+        }
+
+
+    }
 
 
 }

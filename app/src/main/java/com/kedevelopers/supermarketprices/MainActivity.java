@@ -41,20 +41,14 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, SwipeRefreshLayout.OnRefreshListener,SearchView.OnQueryTextListener {
+        implements NavigationView.OnNavigationItemSelectedListener, SearchView.OnQueryTextListener {
 
-    private SearchView searchView;
-    private List<Product> listProduct;
-    private ArrayList<Product> listProduct2;
-    private  ProgressBar progressBar1;
-    //Creating Views
+    private ArrayList<Product> listProduct;
+    private ProgressBar progressBar1;
     private RecyclerView recyclerView;
     private RecyclerView.LayoutManager layoutManager;
     private ProductsAdapter adapter;
-    //Volley Request Queue
 
-    //The request counter to send ?page=1, ?page=2  requests
-    private int requestCount = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,9 +65,6 @@ public class MainActivity extends AppCompatActivity
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
-        //Initializing our Productes list
-        listProduct = new ArrayList<>();
-
 
         loadJSON();
 
@@ -84,7 +75,6 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-              //  searchView.onActionViewExpanded();
                 loadJSON();
             }
         });
@@ -99,15 +89,6 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
     }
 
-    //This method would check that the recyclerview scroll has reached the bottom or not
-    private boolean isLastItemDisplaying(RecyclerView recyclerView) {
-        if (recyclerView.getAdapter().getItemCount() != 0) {
-            int lastVisibleItemPosition = ((LinearLayoutManager) recyclerView.getLayoutManager()).findLastCompletelyVisibleItemPosition();
-            if (lastVisibleItemPosition != RecyclerView.NO_POSITION && lastVisibleItemPosition == recyclerView.getAdapter().getItemCount() - 1)
-                return true;
-        }
-        return false;
-    }
 
     @Override
     public void onBackPressed() {
@@ -121,9 +102,6 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-
-
 
         getMenuInflater().inflate(R.menu.main, menu);
 
@@ -137,7 +115,7 @@ public class MainActivity extends AppCompatActivity
                     public boolean onMenuItemActionCollapse(MenuItem item) {
                         // Do something when collapsed
 
-                        adapter.setFilter(listProduct2);
+                        adapter.setFilter(listProduct);
                         return true; // Return true to collapse action view
                     }
 
@@ -179,17 +157,17 @@ public class MainActivity extends AppCompatActivity
             startActivity(intent);
 
 
-    } else if (id == R.id.nav_s_admin) {
-        Intent intent = new Intent(MainActivity.this, SupermarketAdmin.class);
-        startActivity(intent);
+        } else if (id == R.id.nav_s_admin) {
+            Intent intent = new Intent(MainActivity.this, SupermarketAdmin.class);
+            startActivity(intent);
 
-    } else if (id == R.id.nav_slideshow) {
-                Intent sharingIntent = new Intent(Intent.ACTION_SEND);
-                sharingIntent.setType("text/plain");
-                String shareBody = "This app is terrific - you can file compare prices on different commodities from different supermarkets";
-                sharingIntent.putExtra(Intent.EXTRA_SUBJECT, "Get the app");
-                sharingIntent.putExtra(Intent.EXTRA_TEXT, shareBody);
-                MainActivity.this.startActivity(Intent.createChooser(sharingIntent,"Share via"));
+        } else if (id == R.id.nav_slideshow) {
+            Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+            sharingIntent.setType("text/plain");
+            String shareBody = "This app is terrific - you can file compare prices on different commodities from different supermarkets";
+            sharingIntent.putExtra(Intent.EXTRA_SUBJECT, "Get the app");
+            sharingIntent.putExtra(Intent.EXTRA_TEXT, shareBody);
+            MainActivity.this.startActivity(Intent.createChooser(sharingIntent, "Share via"));
 
 
         } else if (id == R.id.nav_manage) {
@@ -205,21 +183,17 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onRefresh() {
-      //  getData();
-    }
-
-    @Override
     public boolean onQueryTextSubmit(String query) {
         return false;
     }
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        final List<Product> filteredModelList = filter(listProduct2, newText);
+        final List<Product> filteredModelList = filter(listProduct, newText);
         adapter.setFilter(filteredModelList);
         return true;
     }
+
     private List<Product> filter(List<Product> models, String query) {
         query = query.toLowerCase();
 
@@ -232,7 +206,8 @@ public class MainActivity extends AppCompatActivity
         }
         return filteredModelList;
     }
-    private void loadJSON(){
+
+    private void loadJSON() {
         progressBar1.setVisibility(View.VISIBLE);
 
 
@@ -247,12 +222,10 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onResponse(Call<JSONResponse> call, retrofit2.Response<JSONResponse> response) {
                 JSONResponse jsonResponse = response.body();
-               // Log.d("Prods", jsonResponse.toString());
-              //  Toast.makeText(getApplicationContext(),jsonResponse.toString(),Toast.LENGTH_SHORT).show();
-                listProduct2 = new ArrayList<>(Arrays.asList(jsonResponse.getProducts()));
-                 Log.d("Prods", listProduct2.toString());
+                listProduct = new ArrayList<>(Arrays.asList(jsonResponse.getProducts()));
+                Log.d("Prods", listProduct.toString());
 
-                adapter = new ProductsAdapter(listProduct2, getApplicationContext());
+                adapter = new ProductsAdapter(listProduct, getApplicationContext());
                 recyclerView.setAdapter(adapter);
                 progressBar1.setVisibility(View.INVISIBLE);
 
@@ -264,32 +237,32 @@ public class MainActivity extends AppCompatActivity
             }
         });
     }
-    private void ShowDialog(String title, String message){
-       // int id = item.getItemId();
-        Dialog.Builder builder = null;
+
+    private void ShowDialog(String title, String message) {
+        Dialog.Builder builder;
 
         boolean isLightTheme = ThemeManager.getInstance().getCurrentTheme() == 0;
 
-            builder = new SimpleDialog.Builder(isLightTheme ? R.style.SimpleDialogLight : R.style.SimpleDialog){
-                @Override
-                public void onPositiveActionClicked(DialogFragment fragment) {
-                      Toast.makeText(MainActivity.this, "Agreed", Toast.LENGTH_SHORT).show();
-                    super.onPositiveActionClicked(fragment);
-                }
+        builder = new SimpleDialog.Builder(isLightTheme ? R.style.SimpleDialogLight : R.style.SimpleDialog) {
+            @Override
+            public void onPositiveActionClicked(DialogFragment fragment) {
+                Toast.makeText(MainActivity.this, "Agreed", Toast.LENGTH_SHORT).show();
+                super.onPositiveActionClicked(fragment);
+            }
 
-                @Override
-                public void onNegativeActionClicked(DialogFragment fragment) {
-                       Toast.makeText(MainActivity.this, "Disagreed", Toast.LENGTH_SHORT).show();
-                    super.onNegativeActionClicked(fragment);
-                }
-            };
+            @Override
+            public void onNegativeActionClicked(DialogFragment fragment) {
+                Toast.makeText(MainActivity.this, "Disagreed", Toast.LENGTH_SHORT).show();
+                super.onNegativeActionClicked(fragment);
+            }
+        };
 
-            ((SimpleDialog.Builder)builder).message(message)
-                    .title(title)
-                    .positiveAction("OK");
+        ((SimpleDialog.Builder) builder).message(message)
+                .title(title)
+                .positiveAction("OK");
 
-            DialogFragment fragment = DialogFragment.newInstance(builder);
-            fragment.show(getSupportFragmentManager(),null);
+        DialogFragment fragment = DialogFragment.newInstance(builder);
+        fragment.show(getSupportFragmentManager(), null);
 
     }
 }

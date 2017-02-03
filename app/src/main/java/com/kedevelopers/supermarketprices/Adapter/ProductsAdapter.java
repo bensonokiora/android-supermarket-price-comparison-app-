@@ -23,8 +23,7 @@ import com.kedevelopers.supermarketprices.R;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- */
+
 public class ProductsAdapter extends RecyclerView.Adapter<ProductsAdapter.ViewHolder> {
 
     //Imageloader to load image

@@ -99,40 +99,6 @@ public class SuperMarketProductAdapter extends RecyclerView.Adapter<SuperMarketP
         Products.addAll(products);
         notifyDataSetChanged();
     }
-    private  void ShowAddDialog(){
-      /*  Dialog.Builder builder = null;
-
-        boolean isLightTheme = ThemeManager.getInstance().getCurrentTheme() == 0;
-
-        builder = new SimpleDialog.Builder(isLightTheme ? R.style.SimpleDialogLight : R.style.SimpleDialog){
-
-            @Override
-            protected void onBuildDone(Dialog dialog) {
-                dialog.layoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            }
-
-            @Override
-            public void onPositiveActionClicked(DialogFragment fragment) {
-                EditText et_pass = (EditText)fragment.getDialog().findViewById(R.id.custom_et_password);
-                // Toast.makeText(mActivity, "Connected. pass=" + et_pass.getText().toString(), Toast.LENGTH_SHORT).show();
-                super.onPositiveActionClicked(fragment);
-            }
-
-            @Override
-            public void onNegativeActionClicked(DialogFragment fragment) {
-                // Toast.makeText(mActivity, "Cancelled", Toast.LENGTH_SHORT).show();
-                super.onNegativeActionClicked(fragment);
-            }
-        };
-
-        builder.title("Google Wi-Fi")
-                .positiveAction("CONNECT")
-                .negativeAction("CANCEL")
-                .contentView(R.layout.layout_dialog_add_product);
-        FragmentManager fragmentManager = context.getFragmentManager();
-        DialogFragment fragment = DialogFragment.newInstance(builder);
-        fragment.show(context.getSupp(), null);*/
-    }
 
     class ViewHolder extends RecyclerView.ViewHolder {
         //Views
@@ -208,84 +174,6 @@ card_layout.setOnLongClickListener(new View.OnLongClickListener() {
 });
         }
 
-        private void DeleteProduct(final String id) {
-
-            String tag_string_req = "req_save";
-            StringRequest strReq = new StringRequest(Request.Method.POST,
-                    Config.DELETE_USER_URL, new Response.Listener<String>() {
-
-                @Override
-                public void onResponse(String response) {
-                    Log.d("TAG", "Upload Response: " + response.toString());
-
-                    try {
-                        JSONObject jObj = new JSONObject(response);
-                        boolean error = jObj.getBoolean("error");
-                        String message = jObj.getString("message");
-
-                        if(!error){
-                            Toast.makeText(context,message,Toast.LENGTH_SHORT).show();
-
-                        }
-
-                        else{
-
-                            Toast.makeText(context,message,Toast.LENGTH_SHORT).show();
-
-
-                        }
-
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            }, new Response.ErrorListener() {
-
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Log.e("TAG", "Upload Error: " + error.getMessage());
-                    if (error instanceof TimeoutError || error instanceof NoConnectionError) {
-                        Toast.makeText(context,"Check your internet Connection | TimeoutError",
-                                Toast.LENGTH_LONG).show();
-                    } else if (error instanceof AuthFailureError) {
-                        //TODO
-                        Toast.makeText(context,"AuthFailureError error",
-                                Toast.LENGTH_LONG).show();
-                    } else if (error instanceof ServerError) {
-                        //TODO
-                        Toast.makeText(context,"ServerError error",
-                                Toast.LENGTH_LONG).show();
-                    } else if (error instanceof NetworkError) {
-                        //TODO
-                        Toast.makeText(context,"NetworkError error",
-                                Toast.LENGTH_LONG).show();
-                    } else if (error instanceof ParseError) {
-                        //TODO
-                        Toast.makeText(context,"ParseError error",
-                                Toast.LENGTH_LONG).show();
-                    }
-
-                }
-            }) {
-
-                @Override
-                protected Map<String, String> getParams() {
-                    // Posting params to register url
-                    Map<String, String> params = new HashMap<String, String>();
-                    //  params.put("tag", "upload");
-                    params.put("id", id);
-
-
-                    return params;
-                }
-
-            };
-
-            // Adding request to request queue
-            AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
-        }
 
         private void AddPrice(final String productname,final String price,final String supermarket) {
 

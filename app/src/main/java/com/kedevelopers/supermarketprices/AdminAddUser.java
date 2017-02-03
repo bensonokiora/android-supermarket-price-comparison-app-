@@ -3,7 +3,6 @@ package com.kedevelopers.supermarketprices;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -32,7 +31,8 @@ public class AdminAddUser extends AppCompatActivity {
 
     private ProgressDialog mProgressDialog;
 
-    TextView fname,mname,lname,supermarket,password,email;
+    TextView fname, mname, lname, supermarket, password, email;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,10 +53,11 @@ public class AdminAddUser extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-               AddUsers();
+                AddUsers();
             }
         });
     }
+
     private void showProgressDialog() {
         if (mProgressDialog == null) {
             mProgressDialog = new ProgressDialog(this);
@@ -72,17 +73,17 @@ public class AdminAddUser extends AppCompatActivity {
             mProgressDialog.dismiss();
         }
     }
-    private void AddUsers() {
-        final String fn= fname.getText().toString().trim();
-        final String mn= mname.getText().toString().trim();
-        final String ln= lname.getText().toString().trim();
-        final String em= email.getText().toString().trim();
 
-        final String sp= supermarket.getText().toString().trim();
-        final String ps= password.getText().toString().trim();
+    private void AddUsers() {
+        final String fn = fname.getText().toString().trim();
+        final String mn = mname.getText().toString().trim();
+        final String ln = lname.getText().toString().trim();
+        final String em = email.getText().toString().trim();
+
+        final String sp = supermarket.getText().toString().trim();
+        final String ps = password.getText().toString().trim();
 
         String tag_string_req = "req_save";
-        // Toast.makeText(getApplicationContext(),"name" ,Toast.LENGTH_SHORT).show();
 
         showProgressDialog();
         StringRequest strReq = new StringRequest(Request.Method.POST,
@@ -95,10 +96,9 @@ public class AdminAddUser extends AppCompatActivity {
                 hideProgressDialog();
                 try {
 
-                  //  Toast.makeText(getApplicationContext(),response.toString(),Toast.LENGTH_SHORT).show();
-                    if(response.toString().contains("false")){
+                    if (response.toString().contains("false")) {
 
-                        Toast.makeText(AdminAddUser.this,"Successfully added users",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AdminAddUser.this, "Successfully added users", Toast.LENGTH_SHORT).show();
 
                         mname.setText(null);
                         lname.setText(null);
@@ -121,23 +121,23 @@ public class AdminAddUser extends AppCompatActivity {
             public void onErrorResponse(VolleyError error) {
                 Log.e("TAG", "Upload Error: " + error.getMessage());
                 if (error instanceof TimeoutError || error instanceof NoConnectionError) {
-                    Toast.makeText(getApplicationContext(),"Check your internet Connection | TimeoutError",
+                    Toast.makeText(getApplicationContext(), "Check your internet Connection | TimeoutError",
                             Toast.LENGTH_LONG).show();
                 } else if (error instanceof AuthFailureError) {
                     //TODO
-                    Toast.makeText(getApplicationContext(),"AuthFailureError error",
+                    Toast.makeText(getApplicationContext(), "AuthFailureError error",
                             Toast.LENGTH_LONG).show();
                 } else if (error instanceof ServerError) {
                     //TODO
-                    Toast.makeText(getApplicationContext(),"ServerError error",
+                    Toast.makeText(getApplicationContext(), "ServerError error",
                             Toast.LENGTH_LONG).show();
                 } else if (error instanceof NetworkError) {
                     //TODO
-                    Toast.makeText(getApplicationContext(),"NetworkError error",
+                    Toast.makeText(getApplicationContext(), "NetworkError error",
                             Toast.LENGTH_LONG).show();
                 } else if (error instanceof ParseError) {
                     //TODO
-                    Toast.makeText(getApplicationContext(),"ParseError error",
+                    Toast.makeText(getApplicationContext(), "ParseError error",
                             Toast.LENGTH_LONG).show();
                 }
 
@@ -150,9 +150,9 @@ public class AdminAddUser extends AppCompatActivity {
                 // Posting params to register url
                 Map<String, String> params = new HashMap<String, String>();
                 //  params.put("tag", "upload");
-                params.put("name", fn );
-               // params.put("mname", mn);
-               // params.put("lname", ln);
+                params.put("name", fn);
+                // params.put("mname", mn);
+                // params.put("lname", ln);
                 params.put("email", em);
                 params.put("supermarket", sp);
                 params.put("password", ps);

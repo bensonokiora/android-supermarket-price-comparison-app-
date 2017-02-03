@@ -8,18 +8,14 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -36,9 +32,7 @@ import com.rey.material.app.Dialog;
 import com.rey.material.app.DialogFragment;
 import com.rey.material.app.SimpleDialog;
 import com.rey.material.app.ThemeManager;
-import com.squareup.picasso.Picasso;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -55,7 +49,7 @@ public class AddProduct extends AppCompatActivity {
     private ImageView imageView;
     private ProgressDialog mProgressDialog;
 
-    EditText productname,description,price, supermarket;
+    EditText productname, description, price, supermarket;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,10 +61,10 @@ public class AddProduct extends AppCompatActivity {
 
         imageView = (ImageView) findViewById(R.id.imgView);
         buttonChoose = (Button) findViewById(R.id.btnupload);
-        productname =(EditText) findViewById(R.id.productname) ;
-        description =(EditText) findViewById(R.id.description) ;
-        price =(EditText) findViewById(R.id.price) ;
-        supermarket =(EditText) findViewById(R.id.supermarket) ;
+        productname = (EditText) findViewById(R.id.productname);
+        description = (EditText) findViewById(R.id.description);
+        price = (EditText) findViewById(R.id.price);
+        supermarket = (EditText) findViewById(R.id.supermarket);
         supermarket.setVisibility(View.VISIBLE);
         buttonChoose.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -80,7 +74,7 @@ public class AddProduct extends AppCompatActivity {
         });
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
-           String sm = extras.getString("supermarket");
+            String sm = extras.getString("supermarket");
             supermarket.setText(sm);
 
         }
@@ -88,29 +82,31 @@ public class AddProduct extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String a,b,c,d;
+                String a, b, c, d;
                 a = productname.getText().toString().trim();
                 b = description.getText().toString().trim();
                 c = price.getText().toString().trim();
                 d = supermarket.getText().toString().trim();
-                if(!a.isEmpty()&& !b.isEmpty()&&!c.isEmpty()&& !d.isEmpty() ){
-                    AddProduct2(a,b,c,d);
+                if (!a.isEmpty() && !b.isEmpty() && !c.isEmpty() && !d.isEmpty()) {
+                    AddProduct2(a, b, c, d);
 
-                }else{
-                     Toast.makeText(AddProduct.this,"Validate All Data First",Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(AddProduct.this, "Validate All Data First", Toast.LENGTH_SHORT).show();
 
                 }
 
             }
         });
     }
-    public String getStringImage(Bitmap bmp){
+
+    public String getStringImage(Bitmap bmp) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bmp.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         byte[] imageBytes = baos.toByteArray();
         String encodedImage = Base64.encodeToString(imageBytes, Base64.DEFAULT);
         return encodedImage;
     }
+
     private void showFileChooser() {
         Intent intent = new Intent();
         intent.setType("image/*");
@@ -134,97 +130,20 @@ public class AddProduct extends AppCompatActivity {
             }
         }
     }
-    private void AddProduct(final String productname,final String description,final String price,final String supermarket) {
-        String tag_string_req = "req_save";
-        // Write new post
-       // attach = "";if(bitmap!=null){
-         final String   attach = getStringImage(bitmap);
-
-        showProgressDialog();
-        StringRequest strReq = new StringRequest(Request.Method.POST,
-                Config.ADD_URL, new Response.Listener<String>() {
-
-            @Override
-            public void onResponse(String response) {
-                Log.d("TAG", "Upload Response: " + response.toString());
-                // Toast.makeText(getApplicationContext(),response.toString(),Toast.LENGTH_SHORT).show();
-
-                hideProgressDialog();
-                try {
-                    JSONObject jObj = new JSONObject(response);
-                    Toast.makeText(getApplicationContext(),"successfully uploaded product",Toast.LENGTH_SHORT).show();
-
-                    showAlertDialog("SUCCESS","Product was saved successfully");
 
 
-                } catch (JSONException e) {
-                    e.printStackTrace();
-
-
-                }
-
-            }
-        }, new Response.ErrorListener() {
-
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.e("TAG", "Upload Error: " + error.getMessage());
-                if (error instanceof TimeoutError || error instanceof NoConnectionError) {
-                    Toast.makeText(getApplicationContext(),"Check your internet Connection | TimeoutError",
-                            Toast.LENGTH_LONG).show();
-                } else if (error instanceof AuthFailureError) {
-                    //TODO
-                    Toast.makeText(getApplicationContext(),"AuthFailureError error",
-                            Toast.LENGTH_LONG).show();
-                } else if (error instanceof ServerError) {
-                    //TODO
-                    Toast.makeText(getApplicationContext(),"ServerError error",
-                            Toast.LENGTH_LONG).show();
-                } else if (error instanceof NetworkError) {
-                    //TODO
-                    Toast.makeText(getApplicationContext(),"NetworkError error",
-                            Toast.LENGTH_LONG).show();
-                } else if (error instanceof ParseError) {
-                    //TODO
-                    Toast.makeText(getApplicationContext(),"ParseError error",
-                            Toast.LENGTH_LONG).show();
-                }
-
-                hideProgressDialog();
-            }
-        }) {
-
-            @Override
-            protected Map<String, String> getParams() {
-                // Posting params to register url
-                Map<String, String> params = new HashMap<String, String>();
-                //  params.put("tag", "upload");
-                params.put("name", productname);
-                params.put("description", description);
-                params.put("price", price);
-                params.put("supermarket", supermarket);
-                params.put("image", attach);
-
-
-                return params;
-            }
-
-        };
-
-        // Adding request to request queue
-        AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
-    }
-    private  void clear(){
+    private void clear() {
         description.setText(null);
         productname.setText(null);
         price.setText(null);
         supermarket.setText(null);
     }
-    private void AddProduct2(final String productname,final String description,final String price,final String supermarket) {
+
+    private void AddProduct2(final String productname, final String description, final String price, final String supermarket) {
 
         String tag_string_req = "req_save";
         // Toast.makeText(getApplicationContext(),"name" ,Toast.LENGTH_SHORT).show();
-        final String   attach = getStringImage(bitmap);
+        final String attach = getStringImage(bitmap);
 
         showProgressDialog();
         StringRequest strReq = new StringRequest(Request.Method.POST,
@@ -240,14 +159,12 @@ public class AddProduct extends AppCompatActivity {
                     boolean error = jObj.getBoolean("error");
                     String message = jObj.getString("message");
 
-                    if(!error){
-                        Toast.makeText(AddProduct.this,message,Toast.LENGTH_SHORT).show();
+                    if (!error) {
+                        Toast.makeText(AddProduct.this, message, Toast.LENGTH_SHORT).show();
                         clear();
-                    }
+                    } else {
 
-                    else{
-
-                        Toast.makeText(AddProduct.this,message,Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AddProduct.this, message, Toast.LENGTH_SHORT).show();
 
 
                     }
@@ -264,23 +181,23 @@ public class AddProduct extends AppCompatActivity {
             public void onErrorResponse(VolleyError error) {
                 Log.e("TAG", "Upload Error: " + error.getMessage());
                 if (error instanceof TimeoutError || error instanceof NoConnectionError) {
-                    Toast.makeText(getApplicationContext(),"Check your internet Connection | TimeoutError",
+                    Toast.makeText(getApplicationContext(), "Check your internet Connection | TimeoutError",
                             Toast.LENGTH_LONG).show();
                 } else if (error instanceof AuthFailureError) {
                     //TODO
-                    Toast.makeText(getApplicationContext(),"AuthFailureError error",
+                    Toast.makeText(getApplicationContext(), "AuthFailureError error",
                             Toast.LENGTH_LONG).show();
                 } else if (error instanceof ServerError) {
                     //TODO
-                    Toast.makeText(getApplicationContext(),"ServerError error",
+                    Toast.makeText(getApplicationContext(), "ServerError error",
                             Toast.LENGTH_LONG).show();
                 } else if (error instanceof NetworkError) {
                     //TODO
-                    Toast.makeText(getApplicationContext(),"NetworkError error",
+                    Toast.makeText(getApplicationContext(), "NetworkError error",
                             Toast.LENGTH_LONG).show();
                 } else if (error instanceof ParseError) {
                     //TODO
-                    Toast.makeText(getApplicationContext(),"ParseError error",
+                    Toast.makeText(getApplicationContext(), "ParseError error",
                             Toast.LENGTH_LONG).show();
                 }
 
@@ -325,30 +242,6 @@ public class AddProduct extends AppCompatActivity {
             mProgressDialog.dismiss();
         }
     }
-    private  void showAlertDialog(String title, String message){
-        //  int id = item.getItemId();
-        Dialog.Builder builder = null;
 
-        boolean isLightTheme = ThemeManager.getInstance().getCurrentTheme() == 0;
 
-        builder = new SimpleDialog.Builder(isLightTheme ? R.style.SimpleDialogLight : R.style.SimpleDialog){
-            @Override
-            public void onPositiveActionClicked(DialogFragment fragment) {
-                //  Toast.makeText(MainActivity.this, "Agreed", Toast.LENGTH_SHORT).show();
-                super.onPositiveActionClicked(fragment);
-            }
-
-            @Override
-            public void onNegativeActionClicked(DialogFragment fragment) {
-                //   Toast.makeText(MainActivity.this, "Disagreed", Toast.LENGTH_SHORT).show();
-                super.onNegativeActionClicked(fragment);
-            }
-        };
-
-        ((SimpleDialog.Builder)builder).message(message)
-                .title(title)
-                .positiveAction("OK");
-        DialogFragment fragment = DialogFragment.newInstance(builder);
-        fragment.show(getSupportFragmentManager(),null);
-    }
 }

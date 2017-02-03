@@ -11,45 +11,9 @@ $app = new \Slim\Slim();
 // User id from db - Global Variable
 $user_id = NULL;
 
-/**
- * Adding Middle Layer to authenticate every request
- * Checking if the request has valid api key in the 'Authorization' header
- */
-function authenticate(\Slim\Route $route) {
-    // Getting request headers
-    $headers = apache_request_headers();
-    $response = array();
-    $app = \Slim\Slim::getInstance();
-
-    // Verifying Authorization Header
-    if (isset($headers['Authorization'])) {
-        $db = new DbHandler();
-
-        // get the api key
-        $api_key = $headers['Authorization'];
-        // validating api key
-        if (!$db->isValidApiKey($api_key)) {
-            // api key is not present in users table
-            $response["error"] = true;
-            $response["message"] = "Access Denied. Invalid Api key";
-            echoRespnse(401, $response);
-            $app->stop();
-        } else {
-            global $user_id;
-            // get user primary key id
-            $user_id = $db->getUserId($api_key);
-        }
-    } else {
-        // api key is missing in header
-        $response["error"] = true;
-        $response["message"] = "Api key is misssing";
-        echoRespnse(400, $response);
-        $app->stop();
-    }
-}
 
 /**
- * ----------- METHODS WITHOUT AUTHENTICATION ---------------------------------
+ * ----------- URLS ---------------------------------
  */
 /**
  * User Registration
@@ -115,7 +79,6 @@ $app->post('/login', function() use ($app) {
                     $response["error"] = false;
                     $response['name'] = $user['name'];
                     $response['email'] = $user['email'];
-                    $response['apiKey'] = $user['api_key'];
                     $response['supermarket'] = $user['supermarket'];
 
                     $response['createdAt'] = $user['created_at'];
@@ -133,77 +96,10 @@ $app->post('/login', function() use ($app) {
             echoRespnse(200, $response);
         });
 
-/*
- * ------------------------ METHODS WITH AUTHENTICATION ------------------------
- */
-
-/**
- * Listing all tasks of particual user
- * method GET
- * url /tasks          
- */
-$app->get('/tasks', 'authenticate', function() {
-            global $user_id;
-            $response = array();
-            $db = new DbHandler();
-
-            // fetching all user tasks
-            $result = $db->getAllUserTasks($user_id);
-
-            $response["error"] = false;
-            $response["tasks"] = array();
-
-            // looping through result and preparing tasks array
-            while ($task = $result->fetch_assoc()) {
-                $tmp = array();
-                $tmp["id"] = $task["id"];
-                $tmp["task"] = $task["task"];
-                $tmp["status"] = $task["status"];
-                $tmp["createdAt"] = $task["created_at"];
-                array_push($response["tasks"], $tmp);
-            }
-
-            echoRespnse(200, $response);
-        });
-
-/**
- * Listing single task of particual user
- * method GET
- * url /tasks/:id
- * Will return 404 if the task doesn't belongs to user
- */
-$app->get('/tasks/:id', 'authenticate', function($task_id) {
-            global $user_id;
-            $response = array();
-            $db = new DbHandler();
-
-            // fetch task
-            $result = $db->getTask($task_id, $user_id);
-
-            if ($result != NULL) {
-                $response["error"] = false;
-                $response["id"] = $result["id"];
-                $response["task"] = $result["task"];
-                $response["status"] = $result["status"];
-                $response["createdAt"] = $result["created_at"];
-                echoRespnse(200, $response);
-            } else {
-                $response["error"] = true;
-                $response["message"] = "The requested resource doesn't exists";
-                echoRespnse(404, $response);
-            }
-        });
-/**
- * Listing single task of particual user
- * method GET
- * url /tasks/:id
- * Will return 404 if the task doesn't belongs to user
- */
  /**
- * Listing single task of particual user
+ * Listing single product of particual user
  * method GET
- * url /tasks/:id
- * Will return 404 if the task doesn't belongs to user
+ * url /products/:id
  */
 $app->get('/get-products/:id', function($page_id) {
             $response = array();
@@ -336,172 +232,73 @@ $app->post('/add-product-price', function() use ($app) {
             // echo json response
             echoRespnse(201, $response);
         });
-/**
- * Creating new task in db
- * method POST
- * params - name
- * url - /tasks/
- */
-$app->post('/tasks', 'authenticate', function() use ($app) {
-            // check for required params
-            verifyRequiredParams(array('task'));
-
-            $response = array();
-            $task = $app->request->post('task');
-            global $user_id;
-            $db = new DbHandler();
-
-            // creating new task
-            $task_id = $db->createTask($user_id, $task);
-
-            if ($task_id != NULL) {
-                $response["error"] = false;
-                $response["message"] = "Task created successfully";
-                $response["task_id"] = $task_id;
-                echoRespnse(201, $response);
-            } else {
-                $response["error"] = true;
-                $response["message"] = "Failed to create task. Please try again";
-                echoRespnse(200, $response);
-            }            
-        });
-
-/**
- * Updating existing task
- * method PUT
- * params task, status
- * url - /tasks/:id
- */
-$app->put('/tasks/:id', 'authenticate', function($task_id) use($app) {
-            // check for required params
-            verifyRequiredParams(array('task', 'status'));
-
-            global $user_id;            
-            $task = $app->request->put('task');
-            $status = $app->request->put('status');
-
-            $db = new DbHandler();
+$app->get('/get-all-users', function() use ($app) {
             $response = array();
 
-            // updating task
-            $result = $db->updateTask($user_id, $task_id, $task, $status);
-            if ($result) {
-                // task updated successfully
-                $response["error"] = false;
-                $response["message"] = "Task updated successfully";
-            } else {
-                // task failed to update
-                $response["error"] = true;
-                $response["message"] = "Task failed to update. Please try again!";
-            }
-            echoRespnse(200, $response);
-        });
-
-/**
- * Deleting task. Users can delete only their tasks
- * method DELETE
- * url /tasks
- */
-$app->delete('/tasks/:id', 'authenticate', function($task_id) use($app) {
-            global $user_id;
-
             $db = new DbHandler();
-            $response = array();
-            $result = $db->deleteTask($user_id, $task_id);
-            if ($result) {
-                // task deleted successfully
-                $response["error"] = false;
-                $response["message"] = "Task deleted succesfully";
-            } else {
-                // task failed to delete
-                $response["error"] = true;
-                $response["message"] = "Task failed to delete. Please try again!";
-            }
-            echoRespnse(200, $response);
-        });
 
-/**
-* Confirm payment
-*/
-$app->post('/mpesa-ref', function() use ($app) {
-            // check for required params $fname,$mname,$lname,$krapin,$krapass, $email, $phone,$mpesaref) {
-
-            verifyRequiredParams(array('mpesaref'));
-
-            $response = array();
-
-            // reading post params
-             $mpesaref = $app->request->post('mpesaref');
-
-           
-            $db = new DbHandler();
-            $res = $db->checkMpesaRef($mpesaref);
-
-            if ($res == MPESAREF_ALREADY_EXISTED) {
-                $response["error"] = false;
-                $response["message"] = "payments successfully made";
-            } else if ($res == MPESAREF_NOT_EXISTED) {
-                $response["error"] = true;
-                $response["message"] = "Oops! An error occurred while validating payment";
-            }
-            // echo json response
-            echoRespnse(201, $response);
-        });
-
-$app->post('/test-count', function() use ($app) {
- $response = array();
- $db = new DbHandler();
-            $result = $db->testcount();
+            // fetch sellers
+            $result = $db->getUsers();
 
             if ($result != NULL) {
-                $response["error"] = false;
-                $response["id"] = $result;
-
-               echoRespnse(200, $response);
+               // $response["error"] = false;
+               $response = $result;
+                echo '{"user":' . $response ."}";
             } else {
-                $response["error"] = true;
-                $response["message"] = "The requested resource doesn't exists";
-                echoRespnse(404, $response);
+               // $response["error"] = true;
+                $response = "not found";
+                echoRespnse(200, $response);
             }
-   });
-/**
-* save registration form
-*/
-$app->post('/save-user', function() use ($app) {
-            // check for required params $fname,$mname,$lname,$krapin,$krapass, $email, $phone,$mpesaref) {
+        });
+$app->post('/delete-user', function() use($app) {
 
-            verifyRequiredParams(array('name','email', 'phone','token'));
+        verifyRequiredParams(array('id'));
 
-            $response = array();
 
             // reading post params
-            $username = $app->request->post('name');
-            $email = $app->request->post('email');
-            $phone = $app->request->post('phone');
-            $token = $app->request->post('token');
+             $id = $app->request->post('id');
 
-            // validating email address
-            validateEmail($email);
-
+         
             $db = new DbHandler();
-            $res = $db->saveUser($username, $email, $phone, $token);
-
-            if ($res == FORM_SAVED_SUCCESSFULLY) {
+            $response = array();
+            $result = $db->deleteUser($id);
+            if ($result) {
+                // User deleted successfully
                 $response["error"] = false;
-                $response["message"] = "details successfully uploaded";
-            } else if ($res == FORM_SAVED_FAILED) {
+                $response["message"] = "User deleted succesfully";
+            } else {
+                // User failed to delete
                 $response["error"] = true;
-                $response["message"] = "Oops! An error occurred while uploading data";
+                $response["message"] = "User failed to delete. Please try again!";
             }
-            // echo json response
-            echoRespnse(201, $response);
+            echoRespnse(200, $response);
         });
-/**
-* save registration form
-*/
+$app->post('/delete-product', function() use($app) {
+
+        verifyRequiredParams(array('id'));
+
+
+            // reading post params
+             $id = $app->request->post('id');
+
+         
+            $db = new DbHandler();
+            $response = array();
+            $result = $db->deleteProduct($id);
+            if ($result) {
+                // User deleted successfully
+                $response["error"] = false;
+                $response["message"] = "Product deleted succesfully";
+            } else {
+                // User failed to delete
+                $response["error"] = true;
+                $response["message"] = "Product failed to delete. Please try again!";
+            }
+            echoRespnse(200, $response);
+        });
+
 
 $app->post('/get-product', function() use ($app) {
-            // check for required params $fname,$mname,$lname,$krapin,$krapass, $email, $phone,$mpesaref) {
 
             verifyRequiredParams(array('ProductName'));
 
@@ -530,112 +327,6 @@ $app->post('/get-product', function() use ($app) {
             echoRespnse(200, $response);
         });
 		
-		
-$app->post('/reg-form', function() use ($app) {
-            // check for required params $fname,$mname,$lname,$krapin,$krapass, $email, $phone,$mpesaref) {
-
-            verifyRequiredParams(array('fname','mname','lname','email', 'phone','mpesaref'));
-
-            $response = array();
-
-            // reading post params
-            $fname = $app->request->post('fname');
-            $mname = $app->request->post('mname'); 
-            $lname = $app->request->post('lname'); 
-            $email = $app->request->post('email');
-            $phone = $app->request->post('phone');
-            $mpesaref = $app->request->post('mpesaref');
-
-            // validating email address
-            validateEmail($email);
-
-            $db = new DbHandler();
-            $res = $db->createRegForm($fname, $mname, $lname, $email, $phone, $mpesaref);
-
-            if ($res == FORM_SAVED_SUCCESSFULLY) {
-                $response["error"] = false;
-                $response["message"] = "details successfully uploaded";
-            } else if ($res == FORM_SAVED_FAILED) {
-                $response["error"] = true;
-                $response["message"] = "Oops! An error occurred while uploading data";
-            }
-            // echo json response
-            echoRespnse(201, $response);
-        });
-/**
-* save nil form
-*/
-$app->post('/nil-form', function() use ($app) {
-            // check for required params $fname,$mname,$lname,$krapin,$krapass, $email, $phone,$mpesaref) {
-
-            verifyRequiredParams(array('fname','mname','lname','krapin','krapass', 'email', 'phone','mpesaref'));
-
-            $response = array();
-
-            // reading post params
-            $fname = $app->request->post('fname');
-            $mname = $app->request->post('mname'); 
-            $lname = $app->request->post('lname'); 
-            $krapin = $app->request->post('krapin');
-            $krapass = $app->request->post('krapass');
-            $email = $app->request->post('email');
-            $phone = $app->request->post('phone');
-            $mpesaref = $app->request->post('mpesaref');
-
-            // validating email address
-            validateEmail($email);
-
-            $db = new DbHandler();
-            $res = $db->createNilForm($fname, $mname, $lname, $krapin, $krapass, $email, $phone, $mpesaref);
-
-            if ($res == FORM_SAVED_SUCCESSFULLY) {
-                $response["error"] = false;
-                $response["message"] = "details successfully uploaded";
-            } else if ($res == FORM_SAVED_FAILED) {
-                $response["error"] = true;
-                $response["message"] = "Oops! An error occurred while uploading data";
-            }
-            // echo json response
-            echoRespnse(201, $response);
-        });
-
-/**
-* save nil form
-*/
-$app->post('/paye-form', function() use ($app) {
-            // check for required params $fname,$mname,$lname,$krapin,$krapass, $email, $phone,$mpesaref) {
-
-            verifyRequiredParams(array('fname','mname','lname','krapin','krapass', 'email', 'phone','mpesaref'));
-
-            $response = array();
-
-            // reading post params
-            $fname = $app->request->post('fname');
-            $mname = $app->request->post('mname'); 
-            $lname = $app->request->post('lname'); 
-            $krapin = $app->request->post('krapin');
-            $krapass = $app->request->post('krapass');
-            $email = $app->request->post('email');
-            $phone = $app->request->post('phone');
-            $mpesaref = $app->request->post('mpesaref');
-            $attachment = $app->request->post('attachment');
-
-            // validating email address
-            validateEmail($email);
-
-            $db = new DbHandler();
-            $res = $db->createPayeForm($fname, $mname, $lname, $krapin, $krapass, $email, $phone, $mpesaref, $attachment);
-
-            if ($res == FORM_SAVED_SUCCESSFULLY) {
-                $response["error"] = false;
-                $response["message"] = "details successfully uploaded";
-            } else if ($res == FORM_SAVED_FAILED) {
-                $response["error"] = true;
-                $response["message"] = "Oops! An error occurred while uploading data";
-            }
-            // echo json response
-            echoRespnse(201, $response);
-        });
 /**
  * Verifying required params posted or not
  */

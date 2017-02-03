@@ -26,7 +26,6 @@ import com.android.volley.Response;
 import com.android.volley.ServerError;
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.kedevelopers.supermarketprices.Adapter.SupermarketPriceAdapter;
@@ -39,15 +38,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ProductView extends AppCompatActivity {
     private ProgressDialog mProgressDialog;
@@ -64,9 +59,6 @@ public class ProductView extends AppCompatActivity {
     //Volley Request Queue
     private RequestQueue requestQueue;
 
-    //The request counter to send ?page=1, ?page=2  requests
-    private int requestCount = 1;
-    private String requestname = "";
 
 
     @Override
@@ -77,25 +69,21 @@ public class ProductView extends AppCompatActivity {
         setSupportActionBar(toolbar);
         mProgressDialog = new ProgressDialog(this);
 
-         tx = (TextView)findViewById(R.id.textt);
+        tx = (TextView) findViewById(R.id.textt);
         imageView = (ImageView) findViewById(R.id.imagesingle);
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
-            int value = extras.getInt("data");
             String name = extras.getString("name");
             String img = extras.getString("image");
 
             getSupportActionBar().setTitle(name);
-              Picasso.with(ProductView.this).load(img).into(imageView);
-
-            //The key argument here must match that used in the other activity
-           // tx.setText(String.valueOf(value) +  name);
-
-           ViewSellers(name);
+            Picasso.with(ProductView.this).load(img).into(imageView);
 
 
-            requestname = (name);
+            ViewSellers(name);
+
+
         }
 
         // ViewSellers("1");
@@ -113,42 +101,7 @@ public class ProductView extends AppCompatActivity {
 
         requestQueue = Volley.newRequestQueue(this);
 
-        //Calling method to get data to fetch data
-      //  getData();
 
-        //Adding an scroll change listener to recyclerview
-        // recyclerView.setOnScrollChangeListener(this);
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
-
-            recyclerView.setOnScrollChangeListener(new RecyclerView.OnScrollChangeListener() {
-                @Override
-                public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-                    //Ifscrolled at last then
-                    if (isLastItemDisplaying(recyclerView)) {
-                        //Calling the method getdata again
-                     //   getData();
-                    }
-                }
-            });
-        } else {
-            recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-                @Override
-                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                    super.onScrolled(recyclerView, dx, dy);
-                    //Ifscrolled at last then
-                    if (isLastItemDisplaying(recyclerView)) {
-                        //Calling the method getdata again
-                      //  getData();
-                    }
-                }
-            });
-
-        }
-        //initializing our adapter
-     //   adapter = new ProductsAdapter(listProducts, this);
-
-        //Adding adapter to recyclerview
-      //  recyclerView.setAdapter(adapter);
         adapter = new SupermarketPriceAdapter(listProduct2, getApplicationContext());
         //Adding adapter to recyclerview
         recyclerView.setAdapter(adapter);
@@ -162,6 +115,7 @@ public class ProductView extends AppCompatActivity {
         });
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
+
     private void showProgressDialog() {
         if (mProgressDialog == null) {
             mProgressDialog = new ProgressDialog(this);
@@ -177,9 +131,10 @@ public class ProductView extends AppCompatActivity {
             mProgressDialog.dismiss();
         }
     }
+
     private void ViewSellers(final String productname) {
         String tag_string_req = "req_save";
-       // Toast.makeText(getApplicationContext(),"name" ,Toast.LENGTH_SHORT).show();
+        // Toast.makeText(getApplicationContext(),"name" ,Toast.LENGTH_SHORT).show();
 
         showProgressDialog();
         StringRequest strReq = new StringRequest(Request.Method.POST,
@@ -188,7 +143,7 @@ public class ProductView extends AppCompatActivity {
             @Override
             public void onResponse(String response) {
                 Log.d("TAG", "Upload Response: " + response.toString());
-               // Toast.makeText(getApplicationContext(),response.toString(),Toast.LENGTH_SHORT).show();
+                // Toast.makeText(getApplicationContext(),response.toString(),Toast.LENGTH_SHORT).show();
 
                 hideProgressDialog();
                 try {
@@ -197,37 +152,7 @@ public class ProductView extends AppCompatActivity {
                     list = jObj.getJSONArray("result");
 
 
-                     // Toast.makeText(getApplicationContext(),jObj.toString(),Toast.LENGTH_SHORT).show();
-                 String t ="";
-                    String p ="";
-
-                    String img ="";
-
-                   /* for(int i=0;i<list.length();i++) {
-                        SupermarketProduct product = new SupermarketProduct();
-
-                        JSONObject c = list.getJSONObject(i);
-
-                        // User successfully stored in MySQL
-                        // Now store the user in sqlite
-                        // String uid = jObj.getString("productId");
-
-                        // JSONObject user = jObj.getJSONObject("result");
-                        String name = c.getString("supermarket");
-                        p = c.getString("price");
-
-                        product.setName(name);
-                        product.setPrice(p);
-
-                        listProduct2.add(product);
-
-                        //tx.setText(t + p);
-                        // img = c.getString("image");
-
-                      //  Toast.makeText(getApplicationContext(),"name" +name ,Toast.LENGTH_SHORT).show();
-                          //t += name + "\n\n";
-                    }
-                    adapter.notifyDataSetChanged();*/
+                    String p = "";
 
                     for (int i = 0; i < list.length(); i++) {
                         //Creating the Product object
@@ -251,17 +176,6 @@ public class ProductView extends AppCompatActivity {
 
                     //Notifying the adapter that data has been added or changed
                     adapter.notifyDataSetChanged();
-                  //  Picasso.with(ProductView.this).load(img).into(imageView);
-                  //   Toast.makeText(getApplicationContext(),jObj.toString(),Toast.LENGTH_SHORT).show();
-
-                       // Toast.makeText(getApplicationContext(), "User successfully registered. Try login now!", Toast.LENGTH_LONG).show();
-
-                       
-
-
-                      //  String errorMsg = jObj.getString("message");
-                      /*  Toast.makeText(getApplicationContext(),
-                                errorMsg, Toast.LENGTH_LONG).show();*/
                     hideProgressDialog();
 
 
@@ -279,23 +193,23 @@ public class ProductView extends AppCompatActivity {
             public void onErrorResponse(VolleyError error) {
                 Log.e("TAG", "Upload Error: " + error.toString());
                 if (error instanceof TimeoutError || error instanceof NoConnectionError) {
-                    Toast.makeText(getApplicationContext(),"Check your internet Connection | TimeoutError",
+                    Toast.makeText(getApplicationContext(), "Check your internet Connection | TimeoutError",
                             Toast.LENGTH_LONG).show();
                 } else if (error instanceof AuthFailureError) {
                     //TODO
-                    Toast.makeText(getApplicationContext(),"AuthFailureError error",
+                    Toast.makeText(getApplicationContext(), "AuthFailureError error",
                             Toast.LENGTH_LONG).show();
                 } else if (error instanceof ServerError) {
                     //TODO
-                    Toast.makeText(getApplicationContext(),"ServerError error",
+                    Toast.makeText(getApplicationContext(), "ServerError error",
                             Toast.LENGTH_LONG).show();
                 } else if (error instanceof NetworkError) {
                     //TODO
-                    Toast.makeText(getApplicationContext(),"NetworkError error",
+                    Toast.makeText(getApplicationContext(), "NetworkError error",
                             Toast.LENGTH_LONG).show();
                 } else if (error instanceof ParseError) {
                     //TODO
-                    Toast.makeText(getApplicationContext(),"ParseError error",
+                    Toast.makeText(getApplicationContext(), "ParseError error",
                             Toast.LENGTH_LONG).show();
                 }
 
@@ -307,7 +221,7 @@ public class ProductView extends AppCompatActivity {
                 // Posting params to register url
                 Map<String, String> params = new HashMap<String, String>();
                 //  params.put("tag", "upload");
-               params.put("product_name", productname);
+                params.put("product_name", productname);
 
 
                 return params;
@@ -319,112 +233,6 @@ public class ProductView extends AppCompatActivity {
         AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
     }
 
-    private JsonArrayRequest getDataFromServer(int requestCount) {
-        //Initializing ProgressBar
-        final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBar1);
 
-        //Displaying Progressbar
-        progressBar.setVisibility(View.VISIBLE);
-        setProgressBarIndeterminateVisibility(true);
-
-        //JsonArrayRequest of volley
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Config.SELLER_URL + "Product1",
-                new Response.Listener<JSONArray>() {
-                    @Override
-                    public void onResponse(JSONArray response) {
-                        //Calling method parseData to parse the json response
-                        parseData(response);
-                        //Hiding the progressbar
-                        progressBar.setVisibility(View.GONE);
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        progressBar.setVisibility(View.GONE);
-                        //If an error occurs that means end of the list has reached
-                        Toast.makeText(ProductView.this, "No More Items Available", Toast.LENGTH_SHORT).show();
-                    }
-                });
-
-        //Returning the request
-        return jsonArrayRequest;
-    }
-
-    //This method will get data from the web api
-    private void getData() {
-        //Adding the method to the queue by calling the method getDataFromServer
-        requestQueue.add(getDataFromServer(requestCount));
-        //Incrementing the request counter
-        requestCount++;
-    }
-
-    //This method will parse json data
-    private void parseData(JSONArray array) {
-        for (int i = 0; i < array.length(); i++) {
-            //Creating the Products object
-            Product Products = new Product();
-            JSONObject json = null;
-            try {
-                //Getting json
-                json = array.getJSONObject(i);
-
-                //Adding data to the Products object
-                Products.setImage(json.getString(Config.TAG_IMAGE_URL));
-                Products.setName(json.getString(Config.TAG_NAME));
-                //Products.setPublisher(json.getString(Config.TAG_PUBLISHER));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            //Adding the Products object to the list
-            listProducts.add(Products);
-        }
-
-        //Notifying the adapter that data has been added or changed
-        adapter.notifyDataSetChanged();
-    }
-
-    //This method would check that the recyclerview scroll has reached the bottom or not
-    private boolean isLastItemDisplaying(RecyclerView recyclerView) {
-        if (recyclerView.getAdapter().getItemCount() != 0) {
-            int lastVisibleItemPosition = ((LinearLayoutManager) recyclerView.getLayoutManager()).findLastCompletelyVisibleItemPosition();
-            if (lastVisibleItemPosition != RecyclerView.NO_POSITION && lastVisibleItemPosition == recyclerView.getAdapter().getItemCount() - 1)
-                return true;
-        }
-        return false;
-    }
-
-    private void loadJSON(){
-      //  progressBar1.setVisibility(View.VISIBLE);
-
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(Config.KE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        RequestInterface request = retrofit.create(RequestInterface.class);
-        Call<JSONResponse> call = request.getProductsList();
-        call.enqueue(new Callback<JSONResponse>() {
-
-            @Override
-            public void onResponse(Call<JSONResponse> call, retrofit2.Response<JSONResponse> response) {
-                JSONResponse jsonResponse = response.body();
-                // Log.d("Prods", jsonResponse.toString());
-                //  Toast.makeText(getApplicationContext(),jsonResponse.toString(),Toast.LENGTH_SHORT).show();
-                listProduct2 = new ArrayList<>(Arrays.asList(jsonResponse.getSupermarketPrices()));
-                Log.d("Prods", listProduct2.toString());
-
-                adapter = new SupermarketPriceAdapter(listProduct2, getApplicationContext());
-                recyclerView.setAdapter(adapter);
-              //  progressBar1.setVisibility(View.INVISIBLE);
-
-            }
-
-            @Override
-            public void onFailure(Call<JSONResponse> call, Throwable t) {
-//                Log.d("Error",t.getMessage());
-            }
-        });
-    }
 }
 

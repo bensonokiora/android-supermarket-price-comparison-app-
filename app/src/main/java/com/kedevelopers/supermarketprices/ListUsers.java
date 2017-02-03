@@ -3,7 +3,6 @@ package com.kedevelopers.supermarketprices;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -11,14 +10,9 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.kedevelopers.supermarketprices.Adapter.UserAdapter;
 import com.kedevelopers.supermarketprices.Model.User;
-import com.rey.material.app.Dialog;
-import com.rey.material.app.DialogFragment;
-import com.rey.material.app.SimpleDialog;
-import com.rey.material.app.ThemeManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,6 +29,7 @@ public class ListUsers extends AppCompatActivity {
     private RecyclerView recyclerView;
     private RecyclerView.LayoutManager layoutManager;
     private UserAdapter adapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,7 +57,7 @@ public class ListUsers extends AppCompatActivity {
         loadUsersListJSON();
     }
 
-    private void loadUsersListJSON(){
+    private void loadUsersListJSON() {
         progressBar1.setVisibility(View.VISIBLE);
 
 
@@ -78,7 +73,6 @@ public class ListUsers extends AppCompatActivity {
             public void onResponse(Call<JSONResponse> call, retrofit2.Response<JSONResponse> response) {
                 JSONResponse jsonResponse = response.body();
                 // Log.d("Prods", jsonResponse.toString());
-                //  Toast.makeText(getApplicationContext(),jsonResponse.toString(),Toast.LENGTH_SHORT).show();
                 listUsers = new ArrayList<>(Arrays.asList(jsonResponse.getUsers()));
                 Log.d("Prods", listUsers.toString());
 
